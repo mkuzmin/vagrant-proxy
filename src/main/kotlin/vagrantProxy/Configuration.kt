@@ -15,4 +15,6 @@ class Configuration {
 
     @NotNull
     lateinit var organization: String
+
+    // TODO: better error messages for missing properties
 }
