@@ -11,8 +11,9 @@ class ProxyController @Autowired constructor (val config: Configuration) {
     @RequestMapping("/{org}/{box}", method = arrayOf(GET, HEAD))
     @ResponseBody
     fun index(@PathVariable org: String, @PathVariable box: String): Box {
-// TODO: validate organization name
-//        if (org != config.organization)
+        if (org != config.organization)
+            throw ResourceNotFoundException()
+
         val repo = ArtifactoryRepo(config.artifactoryUrl, config.repository)
 
         return try {
