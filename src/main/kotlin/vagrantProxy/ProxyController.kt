@@ -3,6 +3,7 @@ package vagrantProxy
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RequestMethod.GET
+import org.springframework.http.HttpStatus
 
 @RestController
 class ProxyController @Autowired constructor (val config: Configuration) {
@@ -12,8 +13,16 @@ class ProxyController @Autowired constructor (val config: Configuration) {
 // TODO: validate organization name
 //        if (org != config.organization)
         val repo = ArtifactoryRepo(config.artifactoryUrl, config.repository)
-        return repo.box("$org/$box")
+
+        return try {
+            repo.box("$org/$box")
+        } catch (e: BoxNotFoundException) {
+            throw ResourceNotFoundException()
+        }
     }
 }
+
+@ResponseStatus(value = HttpStatus.NOT_FOUND)
+class ResourceNotFoundException : RuntimeException()
 
 // TODO: redirect from home page

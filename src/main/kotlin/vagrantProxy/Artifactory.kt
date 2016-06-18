@@ -4,6 +4,7 @@ import org.jfrog.artifactory.client.ArtifactoryClient
 import org.jfrog.artifactory.client.RepositoryHandle
 import org.jfrog.artifactory.client.model.File
 import org.jfrog.artifactory.client.model.Folder
+import groovyx.net.http.HttpResponseException
 
 class ArtifactoryRepo (serverUrl: String, repoName: String) {
     private val repo: RepositoryHandle
@@ -13,8 +14,11 @@ class ArtifactoryRepo (serverUrl: String, repoName: String) {
     }
 
     fun box(name: String): Box {
-        val versionListFolder = repo.folder(name).info<Folder>()
-        // TODO: validate 404
+        val versionListFolder = try {
+            repo.folder(name).info<Folder>()
+        } catch (e: HttpResponseException) {
+            throw BoxNotFoundException()
+        }
         val box = Box(
             name = name,
             versions = versions(versionListFolder)
@@ -65,3 +69,5 @@ class ArtifactoryRepo (serverUrl: String, repoName: String) {
         )
     }
 }
+
+class BoxNotFoundException : Exception()
