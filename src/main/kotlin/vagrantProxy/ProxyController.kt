@@ -8,14 +8,12 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.servlet.ModelAndView
 
 @RestController
-class ProxyController @Autowired constructor (val config: Configuration) {
+class ProxyController @Autowired constructor (val config: Configuration, val repo: ArtifactoryRepo) {
     @RequestMapping("/{org}/{box}", method = arrayOf(GET, HEAD))
     @ResponseBody
     fun index(@PathVariable org: String, @PathVariable box: String): Box {
         if (org != config.organization)
             throw ResourceNotFoundException()
-
-        val repo = ArtifactoryRepo(config.artifactoryUrl, config.repository)
 
         return try {
             repo.box("$org/$box")

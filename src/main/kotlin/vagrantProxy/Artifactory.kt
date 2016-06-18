@@ -1,16 +1,19 @@
 package vagrantProxy
 
+import org.springframework.stereotype.Component
+import org.springframework.beans.factory.annotation.Autowired
 import org.jfrog.artifactory.client.ArtifactoryClient
 import org.jfrog.artifactory.client.RepositoryHandle
 import org.jfrog.artifactory.client.model.File
 import org.jfrog.artifactory.client.model.Folder
 import groovyx.net.http.HttpResponseException
 
-class ArtifactoryRepo (serverUrl: String, repoName: String) {
+@Component
+class ArtifactoryRepo @Autowired constructor (val config: Configuration) {
     private val repo: RepositoryHandle
     init {
-        val artifactory = ArtifactoryClient.create(serverUrl)
-        repo = artifactory.repository(repoName)
+        val artifactory = ArtifactoryClient.create(config.artifactoryUrl)
+        repo = artifactory.repository(config.repository)
     }
 
     fun box(name: String): Box {
