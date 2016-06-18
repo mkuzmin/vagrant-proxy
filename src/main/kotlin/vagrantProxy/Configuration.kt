@@ -17,8 +17,7 @@ class Configuration {
     @NotNull
     lateinit var organization: String
 
-    @NotNull
-    lateinit var redirectUrl: String
+    var redirectUrl = ""
 
     // TODO: better error messages for missing properties
 }

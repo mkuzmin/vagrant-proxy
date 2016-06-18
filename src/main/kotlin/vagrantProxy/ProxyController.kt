@@ -26,7 +26,10 @@ class ProxyController @Autowired constructor (val config: Configuration) {
 
     @RequestMapping("/", method = arrayOf(GET))
     fun redirect () : ModelAndView {
-        return ModelAndView("redirect:${config.redirectUrl}")
+        if (config.redirectUrl != "")
+            return ModelAndView("redirect:${config.redirectUrl}")
+        else
+            throw ResourceNotFoundException()
     }
 }
 
