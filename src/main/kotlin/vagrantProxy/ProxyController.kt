@@ -3,11 +3,12 @@ package vagrantProxy
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RequestMethod.GET
+import org.springframework.web.bind.annotation.RequestMethod.HEAD
 import org.springframework.http.HttpStatus
 
 @RestController
 class ProxyController @Autowired constructor (val config: Configuration) {
-    @RequestMapping("/{org}/{box}", method = arrayOf(GET))
+    @RequestMapping("/{org}/{box}", method = arrayOf(GET, HEAD))
     @ResponseBody
     fun index(@PathVariable org: String, @PathVariable box: String): Box {
 // TODO: validate organization name
