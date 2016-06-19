@@ -9,16 +9,10 @@ import org.jfrog.artifactory.client.model.Folder
 import groovyx.net.http.HttpResponseException
 
 @Component
-class ArtifactoryRepo @Autowired constructor (val config: Configuration) {
-    private val repo: RepositoryHandle
-    init {
-        val artifactory = ArtifactoryClient.create(config.artifactoryUrl)
-        repo = artifactory.repository(config.repository)
-    }
-
+class Repository @Autowired constructor (val artifactory: Artifactory) {
     fun box(name: String): Box {
         val versionListFolder = try {
-            repo.folder(name).info<Folder>()
+            artifactory.folderInfo(name)
         } catch (e: HttpResponseException) {
             throw BoxNotFoundException()
         }
@@ -34,7 +28,7 @@ class ArtifactoryRepo @Autowired constructor (val config: Configuration) {
         for (item in versionListFolder.children) {
             if (!item.isFolder) continue
 
-            val versionFolder = repo.folder(versionListFolder.path + item.uri).info<Folder>()
+            val versionFolder = artifactory.folderInfo(versionListFolder.path + item.uri)
             val versionNumber = item.uri.replace(Regex("^/"), "")
             versions.add(version(versionFolder, versionNumber))
         }
@@ -57,7 +51,7 @@ class ArtifactoryRepo @Autowired constructor (val config: Configuration) {
             if (matcher==null || matcher.groupValues.size!=2) continue
             val providerName = matcher.groupValues[1]
 
-            val boxFile = repo.file(versionFolder.path.replace(Regex("^/"), "") + item.uri).info<File>()
+            val boxFile = artifactory.fileInfo(versionFolder.path.replace(Regex("^/"), "") + item.uri)
             providers.add(provider(boxFile, providerName))
         }
         return providers
@@ -74,3 +68,20 @@ class ArtifactoryRepo @Autowired constructor (val config: Configuration) {
 }
 
 class BoxNotFoundException : Exception()
+
+@Component
+class Artifactory @Autowired constructor (val config: Configuration) {
+    private val repo: RepositoryHandle
+    init {
+        val artifactory = ArtifactoryClient.create(config.artifactoryUrl)
+        repo = artifactory.repository(config.repository)
+    }
+
+    fun folderInfo (path: String) : Folder {
+        return repo.folder(path).info<Folder>()
+    }
+
+    fun fileInfo (path: String) : File {
+        return repo.file(path).info<File>()
+    }
+}

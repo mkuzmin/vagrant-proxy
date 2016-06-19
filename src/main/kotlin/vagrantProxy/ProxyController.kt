@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.servlet.ModelAndView
 
 @RestController
-class ProxyController @Autowired constructor (val config: Configuration, val repo: ArtifactoryRepo) {
+class ProxyController @Autowired constructor (val config: Configuration, val repo: Repository) {
     @RequestMapping("/{org}/{box}", method = arrayOf(GET, HEAD))
     @ResponseBody
     fun index(@PathVariable org: String, @PathVariable box: String): Box {
