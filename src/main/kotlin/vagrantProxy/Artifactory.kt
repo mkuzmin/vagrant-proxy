@@ -7,6 +7,7 @@ import org.jfrog.artifactory.client.RepositoryHandle
 import org.jfrog.artifactory.client.model.File
 import org.jfrog.artifactory.client.model.Folder
 import groovyx.net.http.HttpResponseException
+import org.springframework.cache.annotation.Cacheable
 
 @Component
 class Repository @Autowired constructor (val artifactory: Artifactory) {
@@ -70,7 +71,8 @@ class Repository @Autowired constructor (val artifactory: Artifactory) {
 class BoxNotFoundException : Exception()
 
 @Component
-class Artifactory @Autowired constructor (val config: Configuration) {
+open class Artifactory @Autowired constructor (val config: Configuration) {
+    // http://stackoverflow.com/a/11937684/576361
     private val repo: RepositoryHandle
     init {
         val artifactory = ArtifactoryClient.create(config.artifactoryUrl)
@@ -81,6 +83,7 @@ class Artifactory @Autowired constructor (val config: Configuration) {
         return repo.folder(path).info<Folder>()
     }
 
+    @Cacheable
     fun fileInfo (path: String) : File {
         return repo.file(path).info<File>()
     }
