@@ -78,6 +78,7 @@ open class Artifactory @Autowired constructor (open val config: Configuration) {
         repo = artifactory.repository(config.repository)
     }
 
+    @Throws(exceptionClasses =  HttpResponseException::class)
     open fun folderInfo (path: String) : Folder {
         return repo.folder(path).info<Folder>()
     }
