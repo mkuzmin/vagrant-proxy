@@ -13,12 +13,12 @@ class ProxyController @Autowired constructor (val config: Configuration, val rep
     @ResponseBody
     fun index(@PathVariable org: String, @PathVariable box: String): Box {
         if (org != config.organization)
-            throw ResourceNotFoundException()
+            throw ResourceNotFoundException("This repository hosts boxes for '${config.organization}' organization only.")
 
         return try {
             repo.box("$org/$box")
         } catch (e: BoxNotFoundException) {
-            throw ResourceNotFoundException()
+            throw ResourceNotFoundException("Box '$org/$box' is not found on Artifactory server.")
         }
     }
 
@@ -27,9 +27,9 @@ class ProxyController @Autowired constructor (val config: Configuration, val rep
         if (config.redirectUrl != "")
             return ModelAndView("redirect:${config.redirectUrl}")
         else
-            throw ResourceNotFoundException()
+            throw ResourceNotFoundException("Page not found")
     }
 }
 
 @ResponseStatus(value = HttpStatus.NOT_FOUND)
-class ResourceNotFoundException : RuntimeException()
+class ResourceNotFoundException (message: String): RuntimeException(message)
