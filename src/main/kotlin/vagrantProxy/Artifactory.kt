@@ -13,7 +13,7 @@ import org.springframework.cache.annotation.Cacheable
 class Repository @Autowired constructor (val artifactory: Artifactory) {
     fun box(name: String): Box {
         val versionListFolder = try {
-            artifactory.folderInfo(name)
+            artifactory.boxInfo(name)
         } catch (e: HttpResponseException) {
             throw BoxNotFoundException()
         }
@@ -29,7 +29,7 @@ class Repository @Autowired constructor (val artifactory: Artifactory) {
         for (item in versionListFolder.children) {
             if (!item.isFolder) continue
 
-            val versionFolder = artifactory.folderInfo(versionListFolder.path + item.uri)
+            val versionFolder = artifactory.versionInfo(versionListFolder.path + item.uri)
             val versionNumber = item.uri.replace(Regex("^/"), "")
             versions.add(version(versionFolder, versionNumber))
         }
@@ -79,11 +79,16 @@ open class Artifactory @Autowired constructor (open val config: Configuration) {
     }
 
     @Throws(exceptionClasses =  HttpResponseException::class)
-    open fun folderInfo (path: String) : Folder {
+    open fun boxInfo (path: String) : Folder {
         return repo.folder(path).info<Folder>()
     }
 
-    @Cacheable("artifactory")
+    @Cacheable("versions")
+    open fun versionInfo (path: String) : Folder {
+        return repo.folder(path).info<Folder>()
+    }
+
+    @Cacheable("files")
     open fun fileInfo (path: String) : File {
         return repo.file(path).info<File>()
     }
