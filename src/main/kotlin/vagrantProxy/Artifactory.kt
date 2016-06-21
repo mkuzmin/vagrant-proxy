@@ -15,7 +15,10 @@ class Repository @Autowired constructor (val artifactory: Artifactory) {
         val versionListFolder = try {
             artifactory.boxInfo(name)
         } catch (e: HttpResponseException) {
-            throw BoxNotFoundException()
+            if (e.response.status == 404)
+                throw BoxNotFoundException()
+            else
+                throw ArtifactoryErrorException()
         }
         val box = Box(
             name = name,
@@ -69,6 +72,7 @@ class Repository @Autowired constructor (val artifactory: Artifactory) {
 }
 
 class BoxNotFoundException : Exception()
+class ArtifactoryErrorException : Exception()
 
 @Component
 open class Artifactory @Autowired constructor (open val config: Configuration) {
