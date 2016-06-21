@@ -71,20 +71,19 @@ class Repository @Autowired constructor (val artifactory: Artifactory) {
 class BoxNotFoundException : Exception()
 
 @Component
-open class Artifactory @Autowired constructor (val config: Configuration) {
-    // http://stackoverflow.com/a/11937684/576361
-    private val repo: RepositoryHandle
+open class Artifactory @Autowired constructor (open val config: Configuration) {
+    open protected val repo: RepositoryHandle
     init {
         val artifactory = ArtifactoryClient.create(config.artifactoryUrl)
         repo = artifactory.repository(config.repository)
     }
 
-    fun folderInfo (path: String) : Folder {
+    open fun folderInfo (path: String) : Folder {
         return repo.folder(path).info<Folder>()
     }
 
-    @Cacheable
-    fun fileInfo (path: String) : File {
+    @Cacheable("artifactory")
+    open fun fileInfo (path: String) : File {
         return repo.file(path).info<File>()
     }
 }
