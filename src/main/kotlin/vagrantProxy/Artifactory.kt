@@ -8,6 +8,7 @@ import org.jfrog.artifactory.client.model.File
 import org.jfrog.artifactory.client.model.Folder
 import groovyx.net.http.HttpResponseException
 import org.springframework.cache.annotation.Cacheable
+import java.net.ConnectException
 
 @Component
 class Repository @Autowired constructor (val artifactory: Artifactory) {
@@ -19,6 +20,8 @@ class Repository @Autowired constructor (val artifactory: Artifactory) {
                 throw BoxNotFoundException()
             else
                 throw ArtifactoryErrorException()
+        } catch (e: ConnectException) {
+            throw ArtifactoryErrorException()
         }
         val box = Box(
             name = name,
@@ -82,16 +85,18 @@ open class Artifactory @Autowired constructor (open val config: Configuration) {
         repo = artifactory.repository(config.repository)
     }
 
-    @Throws(exceptionClasses =  HttpResponseException::class)
+    @Throws(HttpResponseException::class, ConnectException::class)
     open fun boxInfo (path: String) : Folder {
         return repo.folder(path).info<Folder>()
     }
 
+    @Throws(HttpResponseException::class, ConnectException::class)
     @Cacheable("versions")
     open fun versionInfo (path: String) : Folder {
         return repo.folder(path).info<Folder>()
     }
 
+    @Throws(HttpResponseException::class, ConnectException::class)
     @Cacheable("files")
     open fun fileInfo (path: String) : File {
         return repo.file(path).info<File>()

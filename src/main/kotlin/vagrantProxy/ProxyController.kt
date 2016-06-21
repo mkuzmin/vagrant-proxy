@@ -19,6 +19,8 @@ class ProxyController @Autowired constructor (val config: Configuration, val rep
             repo.box("$org/$box")
         } catch (e: BoxNotFoundException) {
             throw ResourceNotFoundException("Box '$org/$box' is not found on Artifactory server.")
+        } catch (e: ArtifactoryErrorException) {
+            throw BadGatewayException("Artifactory server is unavailable")
         }
     }
 
@@ -33,3 +35,6 @@ class ProxyController @Autowired constructor (val config: Configuration, val rep
 
 @ResponseStatus(value = HttpStatus.NOT_FOUND)
 class ResourceNotFoundException (message: String): RuntimeException(message)
+
+@ResponseStatus(value = HttpStatus.BAD_GATEWAY)
+class BadGatewayException (message: String): RuntimeException(message)
