@@ -6,5 +6,18 @@ services:
       - artifactory_data:/var/opt/jfrog/artifactory/data
     ports:
       - "8081:8081"
+  vagrant_proxy:
+    build:
+      context: ./
+    depends_on:
+      - artifactory
+    image: mkuzmin/vagrant-proxy
+    environment:
+      artifactoryUrl: http://artifactory:8081/artifactory/
+      repository: vagrant
+      organization: org
+      redirectUrl: http://www.google.com
+    ports:
+      - "8080:8080"
 volumes:
-  artifactory_data: {}
+  artifactory_data:
