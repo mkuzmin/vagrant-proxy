@@ -1,5 +1,6 @@
 package vagrantProxy
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RequestMethod.GET
@@ -9,11 +10,16 @@ import org.springframework.web.servlet.ModelAndView
 
 @RestController
 class ProxyController @Autowired constructor (val config: Configuration, val repo: Repository) {
+    private val log = LoggerFactory.getLogger(this.javaClass)
+
     @RequestMapping("/{org}/{box}", method = arrayOf(GET, HEAD))
     @ResponseBody
     fun index(@PathVariable org: String, @PathVariable box: String): Box {
-        if (org != config.organization)
+        log.info("'$org/$box' box requested")
+        if (org != config.organization) {
+            log.warn("Invalid organization name '$org'")
             throw ResourceNotFoundException("This repository hosts boxes for '${config.organization}' organization only.")
+        }
 
         return try {
             repo.box("$org/$box")
@@ -26,6 +32,7 @@ class ProxyController @Autowired constructor (val config: Configuration, val rep
 
     @RequestMapping("/", method = arrayOf(GET))
     fun redirect () : ModelAndView {
+        log.info("Home page requested")
         if (config.redirectUrl != "")
             return ModelAndView("redirect:${config.redirectUrl}")
         else

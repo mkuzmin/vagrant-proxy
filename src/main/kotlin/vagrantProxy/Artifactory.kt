@@ -7,20 +7,27 @@ import org.jfrog.artifactory.client.RepositoryHandle
 import org.jfrog.artifactory.client.model.File
 import org.jfrog.artifactory.client.model.Folder
 import groovyx.net.http.HttpResponseException
+import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.Cacheable
 import java.net.ConnectException
 
 @Component
 class Repository @Autowired constructor (val artifactory: Artifactory) {
+    private val log = LoggerFactory.getLogger(this.javaClass)
+
     fun box(name: String): Box {
         val versionListFolder = try {
             artifactory.boxInfo(name)
         } catch (e: HttpResponseException) {
-            if (e.response.status == 404)
+            if (e.response.status == 404) {
+                log.warn("Box '$name' not found")
                 throw BoxNotFoundException()
-            else
+            } else {
+                log.error("Artifactory returned an error: [${e.response.status}] ${e.response.statusLine}")
                 throw ArtifactoryErrorException()
+            }
         } catch (e: ConnectException) {
+            log.error("Artifactory connection error: ${e.message}")
             throw ArtifactoryErrorException()
         }
         val box = Box(
@@ -84,21 +91,26 @@ open class Artifactory @Autowired constructor (open val config: Configuration) {
         val artifactory = ArtifactoryClient.create(config.artifactoryUrl)
         repo = artifactory.repository(config.repository)
     }
+    open protected val log = LoggerFactory.getLogger(this.javaClass)
+
 
     @Throws(HttpResponseException::class, ConnectException::class)
     open fun boxInfo (path: String) : Folder {
+        log.debug("Request box info in Artifactory for '$path'")
         return repo.folder(path).info<Folder>()
     }
 
     @Throws(HttpResponseException::class, ConnectException::class)
     @Cacheable("versions")
     open fun versionInfo (path: String) : Folder {
+        log.debug("Request version info in Artifactory for '$path'")
         return repo.folder(path).info<Folder>()
     }
 
     @Throws(HttpResponseException::class, ConnectException::class)
     @Cacheable("files")
     open fun fileInfo (path: String) : File {
+        log.debug("Request file info in Artifactory for '$path'")
         return repo.file(path).info<File>()
     }
 }
