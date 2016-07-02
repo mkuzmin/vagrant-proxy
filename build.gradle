@@ -16,10 +16,6 @@ buildscript {
 apply plugin: 'kotlin'
 apply plugin: 'spring-boot'
 
-jar {
-    baseName = 'vagrant-proxy'
-}
-
 repositories {
     jcenter()
 }
@@ -29,6 +25,10 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-web"
     compile "org.springframework.boot:spring-boot-starter-actuator"
     compile "org.jfrog.artifactory.client:artifactory-java-client-services:$artifactoryVersion"
+}
+
+processResources {
+    expand(project.properties)
 }
 
 task wrapper(type: Wrapper) {
