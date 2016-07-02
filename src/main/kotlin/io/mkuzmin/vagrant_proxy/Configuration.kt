@@ -1,4 +1,4 @@
-package vagrantProxy
+package io.mkuzmin.vagrant_proxy
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component

@@ -1,4 +1,4 @@
-package vagrantProxy
+package io.mkuzmin.vagrant_proxy
 
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication

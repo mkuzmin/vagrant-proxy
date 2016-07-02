@@ -1,4 +1,4 @@
-package vagrantProxy
+package io.mkuzmin.vagrant_proxy
 
 data class Box (
     val name: String,
