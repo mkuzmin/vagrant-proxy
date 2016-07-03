@@ -10,6 +10,10 @@ import groovyx.net.http.HttpResponseException
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.Cacheable
 import java.net.ConnectException
+import org.springframework.boot.actuate.health.HealthIndicator
+import org.springframework.boot.actuate.health.Health
+import org.springframework.web.client.RestTemplate
+import org.springframework.http.HttpStatus
 
 @Component
 class Repository @Autowired constructor (val artifactory: Artifactory) {
@@ -112,5 +116,23 @@ open class Artifactory @Autowired constructor (open val config: Configuration) {
     open fun fileInfo (path: String) : File {
         log.debug("Request file info in Artifactory for '$path'")
         return repo.file(path).info<File>()
+    }
+}
+
+@Component
+class ArtifactoryHealth @Autowired constructor (val config: Configuration) : HealthIndicator {
+    private val log = LoggerFactory.getLogger(this.javaClass)
+
+    override fun health() : Health {
+        val restTemplate = RestTemplate()
+        try {
+            val response = restTemplate.getForEntity("${config.artifactoryUrl}api/system/ping", String::class.java)
+            if (response.statusCode != HttpStatus.OK)
+                throw Exception()
+            return Health.up().build()
+        } catch (e : Exception) {
+            log.warn("Artifactory server is down")
+            return Health.down().build()
+        }
     }
 }
