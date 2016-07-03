@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=0.2.dev
+VERSION=0.3.dev
 
 ID=`docker images -q mkuzmin/vagrant-proxy:latest`
 docker tag $ID mkuzmin/vagrant-proxy:$VERSION

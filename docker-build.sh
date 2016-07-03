@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=0.2.dev
+VERSION=0.3.dev
 
 rm -rf build/
 ./gradlew build -Pversion=$VERSION

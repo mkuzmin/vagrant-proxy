@@ -14,6 +14,7 @@ import org.springframework.boot.actuate.health.HealthIndicator
 import org.springframework.boot.actuate.health.Health
 import org.springframework.web.client.RestTemplate
 import org.springframework.http.HttpStatus
+import java.net.URL
 
 @Component
 class Repository @Autowired constructor (val artifactory: Artifactory) {
@@ -126,7 +127,8 @@ class ArtifactoryHealth @Autowired constructor (val config: Configuration) : Hea
     override fun health() : Health {
         val restTemplate = RestTemplate()
         try {
-            val response = restTemplate.getForEntity("${config.artifactoryUrl}api/system/ping", String::class.java)
+            val uri = URL(URL(config.artifactoryUrl), "api/system/ping").toURI()
+            val response = restTemplate.getForEntity(uri, String::class.java)
             if (response.statusCode != HttpStatus.OK)
                 throw Exception()
             return Health.up().build()
