@@ -1,0 +1,38 @@
+apply plugin: 'maven-publish'
+
+ext {
+    boxVersion = '1.0'
+}
+
+publishing {
+    repositories {
+        maven {
+            url 'http://localhost:8081/artifactory/vagrant'
+            credentials {
+                username 'vagrant'
+                password 'vagrant'
+            }
+        }
+    }
+
+    publications {
+        box(MavenPublication) {
+            groupId 'org'
+            artifactId 'windows'
+            version boxVersion
+            artifact('virtualbox.box') {
+                classifier 'virtualbox'
+                extension 'box'
+            }
+        }
+        box(MavenPublication) {
+            groupId 'org'
+            artifactId 'windows'
+            version boxVersion
+            artifact('vsphere.box') {
+                classifier 'vsphere'
+                extension 'box'
+            }
+        }
+    }
+}
